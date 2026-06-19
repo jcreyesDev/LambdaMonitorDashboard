@@ -41,12 +41,11 @@ def get_function_metrics(function_name: str, days: int = 7) -> dict:
         StartTime=start_time,
         EndTime=end_time,
         Period=86400,
-        Statistics=['Sum']
+        Statistics=['Average']
     )
 
     datapoints_duration = duration['Datapoints']
     total_duration = sum(point['Average'] for point in datapoints_duration) / len(datapoints_duration) if datapoints_duration else 0
-    total_duration_rounded = round(total_duration, 2)
 
     throttles = client.get_metric_statistics(
         Namespace='AWS/Lambda',
@@ -62,8 +61,8 @@ def get_function_metrics(function_name: str, days: int = 7) -> dict:
     total_throttles = sum(point['Sum'] for point in datapoints_throttles) if datapoints_throttles else 0
 
     return {
-        'invocations': total_invocations,
-        'errors': total_errors,
-        'duration': total_duration_rounded,
-        'throttles': total_throttles
+        'invocations': int(total_invocations),
+        'errors': int(total_errors),
+        'duration': round(total_duration, 2),
+        'throttles': int(total_throttles)
     }
